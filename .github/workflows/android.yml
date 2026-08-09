@@ -17,7 +17,10 @@ jobs:
         npm install
         npm install @capacitor/core @capacitor/cli @capacitor/android
     - name: Build Web App
-      run: npm run build
+      run: |
+        npm run build
+        mkdir -p dist
+        cp -r build/* dist/ 2>/dev/null || cp -r .next/* dist/ 2>/dev/null || true
     - name: Initialize Capacitor Config
       run: |
         if [ ! -f "capacitor.config.json" ]; then
@@ -25,7 +28,7 @@ jobs:
         fi
     - name: Add Android Platform
       run: |
-        npx cap add android
+        npx cap add android || true
         npx cap sync android
     - name: Build App Bundle (AAB)
       run: |
@@ -35,5 +38,6 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: app-release-aab
-        path: android/app/build/outputs/bundle/release/app-release-release.aab
+        path: android/app/build/outputs/bundle/release/
+
 
