@@ -12,31 +12,28 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-    - name: Install Dependencies
+    - name: Install Tools
       run: |
         npm install --legacy-peer-deps
         npm install @capacitor/core @capacitor/cli @capacitor/android
     - name: Build Web App
       run: npm run build:mobile
-    - name: Initialize Capacitor Config
+    - name: Setup Android Project
       run: |
         if [ ! -f "capacitor.config.json" ]; then
           npx cap init "Calculator Pro" "com.krutikapawan.calculatorpro" --web-dir=dist
         fi
-    - name: Add Android Platform
-      run: |
         npx cap add android || true
         npx cap sync android || true
-    - name: Build App Bundle (AAB)
+    - name: Compile App Bundle
       run: |
         cd android || (npx cap add android && cd android)
         chmod +x gradlew
         ./gradlew bundleRelease || ./gradlew assembleRelease
-    - name: Upload AAB Artifact
+    - name: Export AAB File
       uses: actions/upload-artifact@v4
       with:
         name: app-release-aab
         path: |
           android/app/build/outputs/bundle/release/
           android/app/build/outputs/apk/release/
-  
