@@ -39,3 +39,4 @@ jobs:
         path: |
           android/app/build/outputs/bundle/release/
           android/app/build/outputs/apk/release/
+
