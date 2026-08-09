@@ -1,5 +1,4 @@
-
-        name: Build Android AAB
+name: Build Android AAB
 on:
   push:
     branches: [ main, master ]
@@ -18,10 +17,15 @@ jobs:
         npm install
         npm install @capacitor/core @capacitor/cli @capacitor/android
     - name: Build Web App
-      run: npm run build:mobile
+      run: npm run build
+    - name: Initialize Capacitor Config
+      run: |
+        if [ ! -f "capacitor.config.json" ]; then
+          npx cap init "Calculator Pro" "com.krutikapawan.calculatorpro" --web-dir=dist
+        fi
     - name: Add Android Platform
       run: |
-        npx cap add android || true
+        npx cap add android
         npx cap sync android
     - name: Build App Bundle (AAB)
       run: |
@@ -31,5 +35,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: app-release-aab
-        path: android/app/build/outputs/bundle/release/
+        path: android/app/build/outputs/bundle/release/app-release-release.aab
 
