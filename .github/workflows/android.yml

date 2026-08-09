@@ -32,3 +32,4 @@ jobs:
       with:
         name: app-release-aab
         path: android/app/build/outputs/bundle/release/app-release-release.aab
+
