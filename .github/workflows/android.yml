@@ -1,4 +1,4 @@
-name: Build Android AAB
+name: Build Android APK & AAB
 
 on:
   push:
@@ -44,14 +44,24 @@ jobs:
           fi
           npx cap sync android
 
-      - name: Build AAB
+      - name: Build Debug APK (for testing)
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew bundleRelease
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Calculator-Pro-APK
+          path: android/app/build/outputs/apk/debug/*.apk
+
+      - name: Build Release AAB (for Play Store)
+        working-directory: android
+        run: ./gradlew bundleRelease
 
       - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
           name: Calculator-Pro-AAB
-          path: android/app/build/outputs/bundle/release/*.aab  
+          path: android/app/build/outputs/bundle/release/*.aab
