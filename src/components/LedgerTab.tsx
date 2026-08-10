@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, ArrowUpCircle, ArrowDownCircle, BookOpen } from 'lucide-react';
-import { supabase, LedgerEntry } from '@/supabase';
+import { supabase, isSupabaseConfigured, LedgerEntry } from '@/supabase';
 
 export default function LedgerTab() {
   const [entries, setEntries] = useState<LedgerEntry[]>([]);
@@ -13,6 +13,10 @@ export default function LedgerTab() {
   const [note, setNote] = useState('');
 
   const fetchEntries = async () => {
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError('');
     const { data, error } = await supabase
@@ -33,7 +37,7 @@ export default function LedgerTab() {
 
   const addEntry = async () => {
     const amt = parseFloat(amount);
-    if (!name.trim() || !amt || amt <= 0) return;
+    if (!name.trim() || !amt || amt <= 0 || !supabase) return;
     const { data, error } = await supabase
       .from('ledger_entries')
       .insert({
@@ -57,6 +61,7 @@ export default function LedgerTab() {
   };
 
   const deleteEntry = async (id: string) => {
+    if (!supabase) return;
     const { error } = await supabase.from('ledger_entries').delete().eq('id', id);
     if (error) {
       setError('Could not delete entry.');
@@ -162,6 +167,13 @@ export default function LedgerTab() {
       {/* Error */}
       {error && (
         <div className="glass rounded-2xl p-3 text-red-400 text-sm text-center">{error}</div>
+      )}
+
+      {/* Not configured warning */}
+      {!isSupabaseConfigured && (
+        <div className="glass rounded-2xl p-4 text-amber-400/80 text-sm text-center">
+          Database not configured. Set up Supabase credentials to use the ledger.
+        </div>
       )}
 
       {/* Entries list */}
