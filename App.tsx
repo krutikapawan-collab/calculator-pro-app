@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Calculator, Percent, CreditCard, BookOpen, Globe } from 'lucide-react';
+import { Calculator, Percent, CreditCard, BookOpen, Globe, Shield } from 'lucide-react';
 import CalculatorTab from '@/components/CalculatorTab';
 import GstTab from '@/components/GstTab';
 import EmiTab from '@/components/EmiTab';
 import CurrencyTab from '@/components/CurrencyTab';
 import LedgerTab from '@/components/LedgerTab';
 import InstallPrompt from '@/components/InstallPrompt';
+import PrivacyPolicy from '@/components/PrivacyPolicy';
 
 type Tab = 'calc' | 'gst' | 'emi' | 'currency' | 'ledger';
 
@@ -19,6 +20,7 @@ const TABS: { id: Tab; label: string; icon: React.ElementType; short: string }[]
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('calc');
+  const [showPrivacy, setShowPrivacy] = useState(false);
 
   return (
     <div className="min-h-screen bg-app flex flex-col items-center justify-start">
@@ -30,10 +32,17 @@ export default function App() {
             <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center">
               <Calculator size={20} className="text-emerald-400" />
             </div>
-            <div>
+            <div className="flex-1">
               <h1 className="text-white font-bold text-lg leading-tight">Calculator 1+</h1>
               <p className="text-white/40 text-xs">All-in-One Money Tool</p>
             </div>
+            <button
+              onClick={() => setShowPrivacy(true)}
+              className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center active:scale-90 transition-transform"
+              aria-label="Privacy Policy"
+            >
+              <Shield size={16} className="text-white/50" />
+            </button>
           </div>
         </div>
 
@@ -73,6 +82,7 @@ export default function App() {
       </div>
 
       <InstallPrompt />
+      <PrivacyPolicy open={showPrivacy} onClose={() => setShowPrivacy(false)} />
     </div>
   );
 }

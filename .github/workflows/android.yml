@@ -44,24 +44,51 @@ jobs:
           fi
           npx cap sync android
 
-      - name: Build Debug APK (for testing)
+      # ── Debug APK (for testing) ──────────────────────────────
+      - name: Build Debug APK
         working-directory: android
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Upload APK
+      - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: Calculator-Pro-APK
           path: android/app/build/outputs/apk/debug/*.apk
 
-      - name: Build Release AAB (for Play Store)
+      # ── Signed Release AAB (for Play Store) ──────────────────
+      # Requires these GitHub repository secrets:
+      #   RELEASE_KEYSTORE_BASE64  — base64-encoded .keystore file
+      #   RELEASE_STORE_PASSWORD   — keystore password
+      #   RELEASE_KEY_ALIAS        — key alias name
+      #   RELEASE_KEY_PASSWORD     — key password
+      - name: Decode keystore
+        if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' }}
+        env:
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+        working-directory: android/app
+        run: |
+          echo "$RELEASE_KEYSTORE_BASE64" | base64 -d > release.keystore
+
+      - name: Build Release AAB
+        if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' }}
         working-directory: android
+        env:
+          RELEASE_STORE_FILE: release.keystore
+          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
         run: ./gradlew bundleRelease
 
-      - name: Upload AAB
+      - name: Upload Release AAB
+        if: ${{ env.RELEASE_KEYSTORE_BASE64 != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: Calculator-Pro-AAB
           path: android/app/build/outputs/bundle/release/*.aab
+
+      - name: Clean up keystore
+        if: always()
+        working-directory: android/app
+        run: rm -f release.keystore
